@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+
+  mysql-db1:
+    image: mysql:8
+    container_name: mysql-db1
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - tradexpert
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin1
+    environment:
+      PMA_HOST: mysql-db1
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3031:80"
+    depends_on:
+      - mysql-db1
+    networks:
+      - tradexpert
+
+  trading-platform:
+    image: dahariyavinay/treading-plateform:v1
+    container_name: trading-platform
+    environment:
+      SERVER_PORT: 5454
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db1:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      RAZORPAY_API_KEY: ${RAZORPAY_API_KEY}
+      RAZORPAY_API_SECRET: ${RAZORPAY_API_SECRET}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    ports:
+      - "5454:5454"
+    depends_on:
+      - mysql-db1
+    networks:
+      - tradexpert
+
+networks:
+  tradexpert:
+    driver: bridge
+
+volumes:
+  mysql-data:
